@@ -27,7 +27,7 @@ def set_include(object_id: str, start_datetime, end_datetime):
              ---      new time
     """
     # first sceneraio
-    queryset = TimeBlock.objects.filter(object_id=object_id)
+    queryset = TimeBlock.objects.filter(object_id=object_id).order_by("start_datetime")
     if queryset.filter(
             start_datetime__lte=start_datetime,
             end_datetime__gte=end_datetime).exists():
@@ -74,3 +74,33 @@ def set_include(object_id: str, start_datetime, end_datetime):
         front_overlap.end_datetime = end_overlap.end_datetime
         front_overlap.save()
         end_overlap.delete()
+
+
+def all_include(object_id: str, start_datetime, end_datetime) -> bool:
+    """
+    check if a duration is included
+    """
+    return TimeBlock.objects.filter(
+            object_id=object_id,
+            start_datetime__lte=start_datetime,
+            end_datetime__gte=end_datetime,
+            )
+
+
+def get_gap(object_id: str, start_datetime, end_datetime) -> datetime.datetime:
+    """
+    return the time block ends in the duration.
+    return None if there is not datetime unincluded
+    ======     ====== old time
+        ----          new time1
+            -----     new time2
+    """
+    if all_include(object_id, start_datetime, end_datetime):
+        return None
+    old_time_block = TimeBlock.objects.filter(
+            object_id=object_id,
+            start_datetime__lte=start_datetime
+    ).order_by("start_datetime").last()
+    if old_time_block is None:
+        return start_datetime
+    return max(old_time_block.end_datetime, start_datetime)
