@@ -11,7 +11,7 @@ utils to handle the time block
 from .models import TimeBlock
 
 
-def set_include(object_id: str, start_datetime, end_datetime):
+def add_time_block(object_id: str, start_datetime, end_datetime):
     """
     first scenerio:
         the old time block contains new timeblock

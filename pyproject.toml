@@ -24,12 +24,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["django"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/django-time-block#readme"
-Issues = "https://github.com/unknown/django-time-block/issues"
-Source = "https://github.com/unknown/django-time-block"
+Documentation = "https://github.com/ramwin/django-time-block#readme"
+Issues = "https://github.com/ramwin/django-time-block/issues"
+Source = "https://github.com/ramwin/django-time-block"
 
 [tool.hatch.version]
 path = "src/django_time_block/__about__.py"
@@ -146,7 +146,7 @@ omit = [
 ]
 
 [tool.coverage.paths]
-django_time_block = ["src/django_time_block", "*/django-time-block/src/django_time_block"]
+django_time_block = ["src/django_time_block"]
 tests = ["tests", "*/django-time-block/tests"]
 
 [tool.coverage.report]
@@ -154,4 +154,16 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/example",
+]
+packages = ["src/django_time_block"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_time_block"]
+exclude = [
+    "/example",
 ]
