@@ -130,9 +130,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': ('[%(levelname)5s] %(asctime)s %(pathname)s '
-                       '%(funcName)s (line: %(lineno)d)'
-                       '    %(message)s'),
+            'format': ('[%(levelname)5s] %(asctime)s %(filename)s:%(lineno)d '
+                       '%(funcName)s: %(message)s'),
         },
         'simple': {
             'format': '[%(levelname)s] %(message)s ',
@@ -170,6 +169,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         'console': {
+            "level": "DEBUG",
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -189,6 +189,11 @@ LOGGING = {
             'handlers': ['debug_file', 'info_file',
                          'warning_file', 'error_file', 'console'],
             'level': "INFO",
+        },
+        "django_time_block": {
+            'handlers': ['debug_file', 'info_file',
+                         'warning_file', 'error_file', 'console'],
+            'level': "DEBUG",
         },
     },
 }

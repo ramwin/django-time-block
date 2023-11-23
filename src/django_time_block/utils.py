@@ -8,7 +8,13 @@ utils to handle the time block
 """
 
 
+import datetime
+import logging
+
 from .models import TimeBlock
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def add_time_block(object_id: str, start_datetime, end_datetime):
@@ -27,10 +33,12 @@ def add_time_block(object_id: str, start_datetime, end_datetime):
              ---      new time
     """
     # first sceneraio
+    LOGGER.debug("add time block %s [%s~%s)", object_id, start_datetime, end_datetime)
     queryset = TimeBlock.objects.filter(object_id=object_id).order_by("start_datetime")
     if queryset.filter(
             start_datetime__lte=start_datetime,
             end_datetime__gte=end_datetime).exists():
+        LOGGER.debug("time already exist")
         return
     new_timeblock = TimeBlock.objects.create(
             object_id=object_id,
@@ -81,10 +89,10 @@ def all_include(object_id: str, start_datetime, end_datetime) -> bool:
     check if a duration is included
     """
     return TimeBlock.objects.filter(
-            object_id=object_id,
-            start_datetime__lte=start_datetime,
-            end_datetime__gte=end_datetime,
-            )
+        object_id=object_id,
+        start_datetime__lte=start_datetime,
+        end_datetime__gte=end_datetime,
+    ).exists()
 
 
 def get_gap(object_id: str, start_datetime, end_datetime) -> datetime.datetime:
