@@ -8,8 +8,12 @@ utils to handle the time block
 """
 
 
+from dataclasses import dataclass
+
 import datetime
 import logging
+
+from typing import Optional
 
 from .models import TimeBlock
 
@@ -17,7 +21,13 @@ from .models import TimeBlock
 LOGGER = logging.getLogger(__name__)
 
 
-def add_time_block(object_id: str, start_datetime, end_datetime):
+@dataclass
+class Duration:
+    start: datetime.datetime
+    end: datetime.datetime
+
+
+def add_time_block(object_id: str, duration: Duration):
     """
     first scenerio:
         the old time block contains new timeblock
@@ -33,6 +43,8 @@ def add_time_block(object_id: str, start_datetime, end_datetime):
              ---      new time
     """
     # first sceneraio
+    start_datetime = duration.start
+    end_datetime = duration.end
     LOGGER.debug("add time block %s [%s~%s)", object_id, start_datetime, end_datetime)
     queryset = TimeBlock.objects.filter(object_id=object_id).order_by("start_datetime")
     if queryset.filter(
@@ -84,31 +96,62 @@ def add_time_block(object_id: str, start_datetime, end_datetime):
         end_overlap.delete()
 
 
-def all_include(object_id: str, start_datetime, end_datetime) -> bool:
+def all_include(object_id: str, duration: Duration) -> bool:
     """
     check if a duration is included
     """
     return TimeBlock.objects.filter(
         object_id=object_id,
-        start_datetime__lte=start_datetime,
-        end_datetime__gte=end_datetime,
+        start_datetime__lte=duration.start,
+        end_datetime__gte=duration.end,
     ).exists()
 
 
-def get_gap(object_id: str, start_datetime, end_datetime) -> datetime.datetime:
+def find_min_uninclude(object_id: str, duration: Duration) -> datetime.datetime:
     """
-    return the time block ends in the duration.
-    return None if there is not datetime unincluded
-    ======     ====== old time
-        ----          new time1
-            -----     new time2
+    find the min datetime that was not included
+    =====      ====  old time
+     ---             case 0
+        ---          case 1
+          ---        case 2
+            ----     case 3
+      -----------    also case 3
     """
-    if all_include(object_id, start_datetime, end_datetime):
+    if all_include(object_id, duration):
         return None
     old_time_block = TimeBlock.objects.filter(
             object_id=object_id,
-            start_datetime__lte=start_datetime
+            start_datetime__lte=duration.start
     ).order_by("start_datetime").last()
-    if old_time_block is None:
-        return start_datetime
-    return max(old_time_block.end_datetime, start_datetime)
+    if old_time_block:
+        return max(
+            old_time_block.end_datetime,
+            duration.start)
+    return duration.start
+
+
+def find_max_uninclude(object_id, duration) -> Optional[datetime.datetime]:
+    """
+    find the max datetime that was not included
+    =====      ====  old time
+     ---             case 0
+        ---          case 1
+          ---        case 2
+            ----     case 3
+      -----------    also case 3
+    """
+    # case 0
+    if all_include(object_id, duration):
+        return None
+    # case 3
+    block = TimeBlock.objects.filter(
+        object_id=object_id,
+        end_datetime__lte=duration.end
+    ).order_by("end_datetime").first()
+    if block:
+        return min(
+            block.start_datetime,
+            duration.end
+        )
+    # case 1,2
+    return duration.end

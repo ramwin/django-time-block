@@ -15,7 +15,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from django_time_block.models import TimeBlock
-from django_time_block.utils import add_time_block, all_include, get_gap
+from django_time_block.utils import add_time_block, all_include, find_min_uninclude, Duration
 
 
 def format_datetime(date_str: str) -> datetime.datetime:
@@ -37,59 +37,77 @@ class FunctionTestCase(TestCase):
         """base"""
         object_id = "work_time_user_alice"
         add_time_block(
-            object_id=object_id,
-            start_datetime=format_datetime("2023-09-01 00:00:00"),
-            end_datetime=format_datetime("2023-09-05 00:00:00"),
+            object_id,
+            Duration(
+                start=format_datetime("2023-09-01 00:00:00"),
+                end=format_datetime("2023-09-05 00:00:00"),
+            ),
         )
         self.assertFalse(all_include(
             object_id,
-            format_datetime("2023-09-02 00:00:00"),
-            format_datetime("2023-09-06 00:00:00"),
+            Duration(
+                format_datetime("2023-09-02 00:00:00"),
+                format_datetime("2023-09-06 00:00:00"),
+            ),
         ))
         add_time_block(
-            object_id=object_id,
-            start_datetime=format_datetime("2023-09-05 00:00:00"),
-            end_datetime=format_datetime("2023-09-07 00:00:00"),
+            object_id,
+            Duration(
+                format_datetime("2023-09-05 00:00:00"),
+                format_datetime("2023-09-07 00:00:00"),
+            )
         )
         self.assertEqual(TimeBlock.objects.count(), 1)
         self.assertTrue(all_include(
             object_id,
-            format_datetime("2023-09-02 00:00:00"),
-            format_datetime("2023-09-06 00:00:00"),
+            Duration(
+                format_datetime("2023-09-02 00:00:00"),
+                format_datetime("2023-09-06 00:00:00"),
+            )
         ))
 
-    def test_get_gap(self):
-        """test_get_gap"""
+    def test_find_min_uninclude(self):
+        """test_find_min_uninclude"""
         object_id = "work_time_user_bob"
         add_time_block(
-            object_id=object_id,
-            start_datetime=format_datetime("2023-09-01 00:00:00"),
-            end_datetime=format_datetime("2023-09-02 00:00:00"),
+            object_id,
+            Duration(
+                format_datetime("2023-09-01 00:00:00"),
+                format_datetime("2023-09-02 00:00:00"),
+            )
         )
         add_time_block(
-            object_id=object_id,
-            start_datetime=format_datetime("2023-09-03 00:00:00"),
-            end_datetime=format_datetime("2023-09-04 00:00:00"),
+            object_id,
+            Duration(
+                format_datetime("2023-09-03 00:00:00"),
+                format_datetime("2023-09-04 00:00:00"),
+            )
         )
         self.assertTrue(
-            get_gap(
+            find_min_uninclude(
                 object_id,
-                format_datetime("2023-09-02 11:00:00"),
-                format_datetime("2023-09-03 11:00:00"),
+                Duration(
+                    format_datetime("2023-09-02 11:00:00"),
+                    format_datetime("2023-09-03 11:00:00"),
+                )
             ),
             format_datetime("2023-09-02 11:00:00"),
         )
         self.assertTrue(
-            get_gap(
+            find_min_uninclude(
                 object_id,
-                format_datetime("2023-09-01 11:00:00"),
-                format_datetime("2023-09-03 11:00:00"),
+                Duration(
+                    format_datetime("2023-09-01 11:00:00"),
+                    format_datetime("2023-09-03 11:00:00"),
+                )
             ),
             format_datetime("2023-09-02 00:00:00"),
         )
         add_time_block(
-            object_id=object_id,
-            start_datetime=format_datetime("2023-09-01 00:00:00"),
-            end_datetime=format_datetime("2023-09-04 00:00:00"),
+            object_id,
+            Duration(
+                format_datetime("2023-09-01 00:00:00"),
+                format_datetime("2023-09-04 00:00:00"),
+            )
         )
         self.assertEqual(TimeBlock.objects.count(), 1)
