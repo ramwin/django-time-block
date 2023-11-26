@@ -66,6 +66,31 @@ class FunctionTestCase(TestCase):
             )
         ))
 
+    def test_end_overlap(self):
+        object_id = "work_time_user_alice"
+        add_time_block(
+            object_id,
+            Duration(
+                start=format_datetime("2023-09-01 00:00:00"),
+                end=format_datetime("2023-09-05 00:00:00"),
+            ),
+        )
+        add_time_block(
+            object_id,
+            Duration(
+                start=format_datetime("2023-09-09 00:00:00"),
+                end=format_datetime("2023-09-13 00:00:00"),
+            ),
+        )
+        add_time_block(
+            object_id,
+            Duration(
+                format_datetime("2023-09-07 00:00:00"),
+                format_datetime("2023-09-10 00:00:00"),
+            )
+        )
+        self.assertEqual(TimeBlock.objects.count(), 2)
+
     def test_find_min_uninclude(self):
         """test_find_min_uninclude"""
         object_id = "work_time_user_bob"
