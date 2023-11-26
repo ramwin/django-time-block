@@ -84,7 +84,7 @@ def add_time_block(object_id: str, duration: Duration):
     end_overlap = queryset.filter(
             start_datetime__lte=new_timeblock.end_datetime,
             end_datetime__gt=new_timeblock.end_datetime,
-    )
+    ).first()
     if end_overlap:
         end_overlap.start_datetime = new_timeblock.start_datetime
         end_overlap.save()
