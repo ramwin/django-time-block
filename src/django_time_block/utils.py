@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import datetime
 import logging
 
-from typing import Optional
+from typing import Optional, List
 
 from .models import TimeBlock
 
@@ -107,7 +107,7 @@ def all_include(object_id: str, duration: Duration) -> bool:
     ).exists()
 
 
-def find_min_uninclude(object_id: str, duration: Duration) -> datetime.datetime:
+def find_min_uninclude(object_id: str, duration: Duration) -> Optional[datetime.datetime]:
     """
     find the min datetime that was not included
     =====      ====  old time
@@ -155,3 +155,20 @@ def find_max_uninclude(object_id, duration) -> Optional[datetime.datetime]:
         )
     # case 1,2
     return duration.end
+
+
+def find_uninclude_blocks(object_id: str, duration: Duration) -> List[Duration]:
+    start = find_min_uninclude(object_id, duration)
+    if start is None:
+        return []
+    next_time_block = TimeBlock.objects.filter(
+        object_id=object_id,
+        start_datetime__gt=start,
+    ).order_by("start_datetime").first()
+    if next_time_block is None or next_time_block.end_datetime >= duration.end:
+        return [Duration(start, duration.end)]
+    return [Duration(start=start, end=next_time_block.start_datetime)] + \
+            find_uninclude_blocks(
+                object_id,
+                Duration(next_time_block.end_datetime, duration.end)
+            )

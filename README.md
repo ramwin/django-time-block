@@ -55,6 +55,21 @@ then, the records will merge into one:
     > this two records will be merged: `2023-09-01 ~ 2023-11-11`
 
 
+## API
+* add_time_block  
+
+* all_include  
+check if a duration is all included
+
+* find_min_uninclude  
+find the earliest datetime that was not included
+
+* find_max_uninclude  
+find the latest datetime that was not included
+
+* find_uninclude_blocks  
+find all the uninclude durations
+
 
 [![PyPI - Version](https://img.shields.io/pypi/v/django-time-block.svg)](https://pypi.org/project/django-time-block)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-time-block.svg)](https://pypi.org/project/django-time-block)

@@ -17,5 +17,6 @@ class TimeBlock(models.Model):
 
     class Meta:
         indexes = [
-                models.Index(fields=["object_id", "start_datetime"])
+            models.Index(fields=["object_id", "start_datetime"]),
+            models.Index(fields=["object_id", "end_datetime"]),
         ]

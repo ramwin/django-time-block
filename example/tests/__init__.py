@@ -15,7 +15,10 @@ from django.test import TestCase
 from django.utils import timezone
 
 from django_time_block.models import TimeBlock
-from django_time_block.utils import add_time_block, all_include, find_min_uninclude, Duration
+from django_time_block.utils import (
+    Duration, add_time_block, all_include,
+    find_min_uninclude, find_uninclude_blocks
+)
 
 
 def format_datetime(date_str: str) -> datetime.datetime:
@@ -107,6 +110,29 @@ class FunctionTestCase(TestCase):
                 format_datetime("2023-09-03 00:00:00"),
                 format_datetime("2023-09-04 00:00:00"),
             )
+        )
+        self.assertEqual(
+            find_uninclude_blocks(
+                object_id,
+                Duration(
+                     format_datetime("2023-08-01 00:00:00"),
+                     format_datetime("2023-10-01 00:00:00"),
+                )
+            ),
+            [
+                Duration(
+                    format_datetime("2023-08-01 00:00:00"),
+                    format_datetime("2023-09-01 00:00:00"),
+                ),
+                Duration(
+                    format_datetime("2023-09-02 00:00:00"),
+                    format_datetime("2023-09-03 00:00:00"),
+                ),
+                Duration(
+                    format_datetime("2023-09-04 00:00:00"),
+                    format_datetime("2023-10-01 00:00:00"),
+                ),
+            ]
         )
         self.assertTrue(
             find_min_uninclude(
