@@ -20,3 +20,17 @@ class TimeBlock(models.Model):
             models.Index(fields=["object_id", "start_datetime"]),
             models.Index(fields=["object_id", "end_datetime"]),
         ]
+
+
+class RelationTimeBlock(models.Model):
+    """
+    a time block with should be used in a model
+    e.g.
+        class Worker(models.Model):
+            work_durations = models.ManyToManyField(RelationTimeBlock)
+    """
+    start_datetime = models.DateTimeField(db_index=True)
+    end_datetime = models.DateTimeField(db_index=True)
+
+    class Meta:
+        pass
